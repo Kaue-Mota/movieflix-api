@@ -1,21 +1,29 @@
 {
   "name": "movieflix-api",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:pull": "prisma db pull"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.2",
     "prettier": "3.8.1",
     "prisma": "^4.13.0",
     "tsx": "^4.21.0"
   },
   "dependencies": {
-    "@prisma/client": "^4.13.0"
+    "@prisma/client": "^4.13.0",
+    "express": "^5.2.1",
+    "typescript": "^6.0.2"
   }
 }
