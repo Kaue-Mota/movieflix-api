@@ -80,6 +80,25 @@ app.put('/movies/:id', async (req, res) => {
     res.status(200).send(`Movie with id ${req.body.title} updated successfully`)
 })
 
+app.delete('/movies/:id', async (req, res) => {
+    const id = Number(req.params.id)
+    try {
+        const movieExists = await prisma.movie.findUnique({
+            where: { id },
+        })
+        if (!movieExists) {
+            return res.status(404).json({ error: 'Movie not found' })
+        }
+        await prisma.movie.delete({
+            where: { id },
+        })
+    } catch (error) {
+        console.error('Error deleting movie:', error)
+        return res.status(500).json({ error: 'Failed to delete movie' })
+    }
+    res.status(200).send(`Movie with id ${req.params.id} deleted successfully`)
+})
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)
 })
