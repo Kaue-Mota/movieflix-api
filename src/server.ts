@@ -22,17 +22,29 @@ app.get('/movies', async (req, res) => {
 
 app.post('/movies', async (req, res) => {
     const { title, language_id, genre_id, oscar_count, release_date } = req.body
-
+    // vericar no banco se ja existe um filme com o mesmo titulo, se sim, retornar erro
     try {
-    await prisma.movie.create({
-        data: {
-            title,
-            language_id,
-            genre_id,
-            oscar_count,
-            release_date: new Date(release_date),
-        },
-    })
+        const movieWithSameTitle = await prisma.movie.findFirst({
+            where: {
+                title: { equals: title, mode: 'insensitive' },
+            },
+        })
+
+        if (movieWithSameTitle) {
+            return res
+                .status(409)
+                .json({ error: 'Movie with same title already exists' })
+        }
+
+        await prisma.movie.create({
+            data: {
+                title,
+                language_id,
+                genre_id,
+                oscar_count,
+                release_date: new Date(release_date),
+            },
+        })
     } catch (error) {
         console.error('Error creating movie:', error)
         return res.status(500).json({ error: 'Failed to create movie' })
