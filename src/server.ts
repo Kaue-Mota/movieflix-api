@@ -52,6 +52,34 @@ app.post('/movies', async (req, res) => {
     res.status(201).send()
 })
 
+app.put('/movies/:id', async (req, res) => {
+    const id = Number(req.params.id)
+    const data = req.body
+    data.release_date = data.release_date
+        ? new Date(data.release_date)
+        : undefined
+    try {
+        const movieExists = await prisma.movie.findUnique({
+            where: { id },
+        })
+
+        if (!movieExists) {
+            return res.status(404).json({ error: 'Movie not found' })
+        }
+
+        const movie = await prisma.movie.update({
+            where: { id },
+            data,
+        })
+        console.log('Updated movie:', movie)
+    } catch (error) {
+        console.error('Error updating movie:', error)
+        return res.status(500).json({ error: 'Failed to update movie' })
+    }
+
+    res.status(200).send(`Movie with id ${req.body.title} updated successfully`)
+})
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`)
 })
