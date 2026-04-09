@@ -1,11 +1,16 @@
 import express from 'express'
 import { PrismaClient } from '../generated/prisma/index.js'
+import swaggerUi from 'swagger-ui-express'
+import swaggerDocument from '../swagger.json' with { type: 'json' }
 
 const port = 3000
 const app = express()
 const prisma = new PrismaClient()
 
+
 app.use(express.json())
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)) 
 
 app.get('/movies', async (req, res) => {
     const movies = await prisma.movie.findMany({
@@ -99,6 +104,32 @@ app.delete('/movies/:id', async (req, res) => {
     res.status(200).send(`Movie with id ${req.params.id} deleted successfully`)
 })
 
+app.get('/movies/:genreName', async (req, res) => {
+    try {
+        const genreName = req.params.genreName
+        const moviesFilteredByGenre = await prisma.movie.findMany({
+            include: {
+                genre: true,
+                language: true,
+            },
+            where: {
+                genre: {
+                    name: { equals: genreName, mode: 'insensitive' },
+                },
+            },
+        })
+
+        if (moviesFilteredByGenre.length === 0) {
+            return res.status(404).json({ error: 'No movies found for this genre' })
+        }
+
+        res.status(200).send(moviesFilteredByGenre)
+    } catch (error) {
+        console.error('Error fetching movies by genre:', error)
+        res.status(500).json({ error: 'Failed to fetch movies by genre' })
+    }
+})
+
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`)
+    console.log(`Server is running on http://localhost:${port}/docs`)
 })
